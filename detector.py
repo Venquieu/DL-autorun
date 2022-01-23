@@ -1,6 +1,8 @@
 import argparse
 
-def info_parser(gpu_info:str)->list:
+MEM_THRES = 20 # MB
+
+def mem_info_parser(gpu_info:str)->list:
     info = gpu_info.split('\n')
     assert len(info) > 10, 'Something wrong in the info file, it\'s too short'
     smi_info, pid_info = [], [] 
@@ -21,30 +23,44 @@ def info_parser(gpu_info:str)->list:
         mem_info[id] = (used_memory, total_memory, used_memory/total_memory)
     return mem_info
 
+def list2str(lst:list)->str:
+    for i in range(len(lst)):
+        lst[i] = str(lst[i])
+    return ' '.join(lst)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="detector")
-    parser.add_argument(
-        'file_path', help="path of the nvidia-smi output file"
-    )
-    parser.add_argument(
-        '--gpu_ids', type=int, nargs='+', default=[0], help="the gpus you want to use"
-    )
-    parser.add_argument(
-        '--gpu_nums', type=int, default=1, help="the number of gpus you want to use"
-    )
-    parser.add_argument(
-        '--memory_needs', type=int, help="the memory you need"
-    )
+    
+    parser.add_argument('file_path', help="path of the nvidia-smi output file")
+    parser.add_argument('--gpu_ids', type=int, nargs='+', default=[0], help="the gpus you want to use")
+    parser.add_argument('--gpu_nums', type=int, default=1, help="the number of gpus you want to use")
+    parser.add_argument('--memory_needs', type=int, help="the memory you need")
+
     args = parser.parse_args()
 
     with open(args.file_path, 'r') as f:
         file = f.read()
 
-    mem_info = info_parser(file)
+    mem_info = mem_info_parser(file)
 
-    for id in args.gpu_ids:
-        if mem_info[id][0] > 20:
+    avaliable_gpus = []
+    for id,mem in enumerate(mem_info):
+        if mem[0] <= MEM_THRES:
+            avaliable_gpus.append(id)
+
+    if args.gpu_nums is not None:
+        count = len(avaliable_gpus)
+        if count >= args.gpu_nums:
+            print(list2str(avaliable_gpus))
+        else:
             print('F')
-            exit()
-    print('T')
+        exit()
+    if args.gpu_ids is not None:
+        for id in args.gpu_ids:
+            if id not in avaliable_gpus:
+                print('F')
+                exit()
+        print(list2str(avaliable_gpus))
+    
+    else:
+        print('F')
