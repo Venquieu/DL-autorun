@@ -4,5 +4,5 @@ This is a simple tool for automaticly run your programs(generally they are deep 
 You are recommended to write your command in `cmd.sh` but write it in argument is also work.
 You can use the tool in following way:
 ```
-bash runner.sh 
+python runner.py
 ```
