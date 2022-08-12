@@ -1,8 +1,11 @@
 # DL-Autorun
 This is a simple tool for automaticly run your programs(generally they are deep learning programs) when the GPUs are available.
 ## usage
-You are recommended to write your command in `cmd.sh` but write it in argument is also work.
-You can use the tool in following way:
+write your command in `cmd.sh` and just run `runner.py`.
+
+You can use the tool in following way.
+
+1. specify the number of GPUs you want:
 ```
-python runner.py
+python runner.py --nums 2
 ```
