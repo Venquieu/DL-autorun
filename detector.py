@@ -1,12 +1,9 @@
 import subprocess
 
 class GpuProcesser(object):
-    def __init__(self, gpu_info=None):
-        self.UTIL_THRES = 0.2 # 20%
-
-        self.gpu_status = gpu_info
-        if gpu_info is None:
-            self.update()
+    def __init__(self, threshold):
+        self.UTIL_THRES = threshold
+        self.update()
 
         self.num_gpus = len(self.gpu_map)
         self.free_gpus = []
@@ -16,32 +13,38 @@ class GpuProcesser(object):
             info = self.gpu_status
 
         info = info.split('\n')
-        assert len(info) > 10, 'Something wrong in the info file, it is too short'
+        assert len(info) > 10, \
+            'Something wrong in the info file, it is too short'
         
-        smi_info, pid_info = [], [] 
-        flag = 0
+        smi_info = []
         for i in range(8, len(info)):
             if info[i].startswith(' '):
-                flag = 1
-            if flag == 0:
-                smi_info.append(info[i])
-            else:
-                pid_info.append(info[i])
+                break
+            smi_info.append(info[i])
 
-        mem_info = smi_info[1::4]
-        for id in range(len(mem_info)):
-            info = mem_info[id].split('|')[2].strip()
-            info = info.split('/')
-            used_memory, total_memory = int(info[0].strip()[:-3]), int(info[1].strip()[:-3])
-            mem_info[id] = (used_memory, total_memory, used_memory/total_memory)
-        return mem_info
+        info_map = []
+        for id, smi_info_ in enumerate(smi_info[1::4]):
+            mem_info = smi_info_.split('|')[2].strip()
+            mem_info = mem_info.split('/')
+
+            used_memory = int(mem_info[0].strip()[:-3])
+            total_memory = int(mem_info[1].strip()[:-3])
+            info_map.append(
+                {
+                    'id': id,
+                    'left': total_memory - used_memory,
+                    'total': total_memory,
+                    'util': used_memory/total_memory
+                }
+            )
+        return info_map
     
     def is_gpus_available(self, ids):
         gpus = list(ids)
-        assert max(gpus)<len(self.gpu_map)
+        assert max(gpus) < self.num_gpus
 
         for gpu_id in gpus:
-            if self.gpu_map[gpu_id][2] > self.UTIL_THRES:
+            if self.gpu_map[gpu_id]['util'] > self.UTIL_THRES:
                 return False
         
         self.free_gpus = gpu_id
@@ -52,7 +55,7 @@ class GpuProcesser(object):
         self.free_gpus = []
 
         for gpu_id in range(self.num_gpus):
-            if self.gpu_map[gpu_id][2] < self.UTIL_THRES:
+            if self.gpu_map[gpu_id]['util'] < self.UTIL_THRES:
                 self.free_gpus.append(gpu_id)
 
             if len(self.free_gpus) == num:
@@ -60,8 +63,30 @@ class GpuProcesser(object):
         
         return False
 
-    def has_memory(self, memory_needs:int):
-        raise NotImplementedError
+    def has_memory(self, mem_needs:int):
+        print('will search no more than 2 cards')
+        max_left = [
+            {'id': -1, 'left': 0},
+            {'id': -1, 'left': 0}
+        ]
+        for item in self.gpu_map:
+            if item['left'] > max_left[0]['left']:
+                max_left[1] = max_left[0]
+                max_left[0]['id'] = item['id']
+                max_left[0]['left'] = item['left']
+            elif item['left'] > max_left[1]['left']:
+                max_left[1]['id'] = item['id']
+                max_left[1]['left'] = item['left']
+
+        if max_left[0]['left'] > mem_needs:
+            self.free_gpus = max_left[0]['id']
+            return True
+        if max_left[0]['left'] + max_left[1]['left'] > mem_needs:
+            self.free_gpus = [max_left[0]['id'], max_left[1]['id']]
+            return True
+
+        self.free_gpus = []
+        return False
 
     def update(self):
         try:
@@ -78,6 +103,7 @@ class GpuProcesser(object):
 
     def query(self):
         return self.free_gpus
+
 
 def list_to_str(ids: list):
     string = ''
