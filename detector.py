@@ -39,7 +39,7 @@ class GpuProcesser(object):
             )
         return info_map
     
-    def is_gpus_available(self, ids):
+    def gpus_available(self, ids):
         gpus = list(ids)
         assert max(gpus) < self.num_gpus
 
@@ -50,7 +50,7 @@ class GpuProcesser(object):
         self.free_gpus = gpu_id
         return True
 
-    def is_n_gpu_available(self, num):
+    def n_gpus_available(self, num):
         # firstly clear it
         self.free_gpus = []
 
@@ -63,7 +63,7 @@ class GpuProcesser(object):
         
         return False
 
-    def has_memory(self, mem_needs:int):
+    def has_memory(self, memory:int):
         print('will search no more than 2 cards')
         max_left = [
             {'id': -1, 'left': 0},
@@ -78,10 +78,10 @@ class GpuProcesser(object):
                 max_left[1]['id'] = item['id']
                 max_left[1]['left'] = item['left']
 
-        if max_left[0]['left'] > mem_needs:
+        if max_left[0]['left'] > memory:
             self.free_gpus = max_left[0]['id']
             return True
-        if max_left[0]['left'] + max_left[1]['left'] > mem_needs:
+        if max_left[0]['left'] + max_left[1]['left'] > memory:
             self.free_gpus = [max_left[0]['id'], max_left[1]['id']]
             return True
 

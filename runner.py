@@ -9,7 +9,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="auto-runner")
     parser.add_argument('--ids', type=int, nargs='+', help="the gpus you want to use")
     parser.add_argument('--nums', type=int, help="the number of gpus you want to use")
-    parser.add_argument('--memory_needs', type=int, help="the memory you need")
+    parser.add_argument('--mem', type=int, help="the memory you need")
     parser.add_argument('--thres', default=0.1, type=float, 
         help="memory threshold to judge if a card is free"
     )
@@ -27,13 +27,19 @@ if __name__ == '__main__':
     while processer.update():
         if (
             args.ids is not None 
-            and processer.is_gpus_available(args.ids)
+            and processer.gpus_available(args.ids)
         ):
             break
 
         if (
             args.nums is not None 
-            and processer.is_n_gpu_available(args.nums)
+            and processer.n_gpus_available(args.nums)
+        ):
+            break
+
+        if (
+            args.mem is not None
+            and processer.has_memory(args.mem)
         ):
             break
 
