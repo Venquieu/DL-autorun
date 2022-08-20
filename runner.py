@@ -46,9 +46,11 @@ if __name__ == '__main__':
         time.sleep(args.sleep)
 
     ids = processer.query()
-    if len(ids) == 0:
+    num = len(ids)
+
+    if num == 0:
         exit()
 
     ids = list_to_str(ids)
     logger.info('find suitable device [{}], start running...'.format(ids))
-    os.system('bash cmd.sh {}'.format(ids))
+    os.system('bash cmd.sh {} {}'.format(ids, num))

@@ -1,4 +1,5 @@
 import subprocess
+from copy import deepcopy
 
 class GpuProcesser(object):
     def __init__(self, threshold):
@@ -71,9 +72,11 @@ class GpuProcesser(object):
         ]
         for item in self.gpu_map:
             if item['left'] > max_left[0]['left']:
-                max_left[1] = max_left[0]
+                max_left[1] = deepcopy(max_left[0])
+
                 max_left[0]['id'] = item['id']
                 max_left[0]['left'] = item['left']
+                
             elif item['left'] > max_left[1]['left']:
                 max_left[1]['id'] = item['id']
                 max_left[1]['left'] = item['left']
