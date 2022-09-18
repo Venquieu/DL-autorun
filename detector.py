@@ -82,7 +82,7 @@ class GpuProcesser(object):
                 max_left[1]['left'] = item['left']
 
         if max_left[0]['left'] > memory:
-            self.free_gpus = max_left[0]['id']
+            self.free_gpus = [max_left[0]['id']]
             return True
         if max_left[0]['left'] + max_left[1]['left'] > memory:
             self.free_gpus = [max_left[0]['id'], max_left[1]['id']]
