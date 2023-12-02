@@ -16,8 +16,8 @@ You can use the tool in following way.
 
 1. specify the number of GPUs you want:
 ```
-python runner.py --nums 2 -f cmd.sh
-python runner.py --nums 2 -c "python -m train"
+monitor --nums 2 -f cmd.sh
+monitor --nums 2 -c "python -m train"
 ```
 Note that the program will set environment variable `CUDA_VISIBLE_DEVECES` and pass available GPU ids and number to `cmd.sh` file. Then the file could accept them if you need it:
 ```
