@@ -14,7 +14,20 @@ else
     }
 fi
 
-alias_info="alias monitor='python ~/.DL-autorun/runner.py'"
+if [ -f /usr/bin/python ]; then
+    alias_info="alias monitor='/usr/bin/python ~/.DL-autorun/runner.py'"
+elif [ -f /usr/bin/python3 ]; then
+    alias_info="alias monitor='/usr/bin/python3 ~/.DL-autorun/runner.py'"
+else
+    python --version && alias_info="alias monitor='python ~/.DL-autorun/runner.py'"
+    python3 --version && alias_info="alias monitor='python3 ~/.DL-autorun/runner.py'"
+fi
+
+[ -n "$alias_info" ] || {
+    echo "not found python, have you installed it?"
+    exit 1
+}
+
 if [ -f .bashrc ]; then
     echo >> .bashrc
     echo "# DL_autorun setting" >> .bashrc
@@ -27,4 +40,4 @@ if [ -f .zshrc ]; then
 fi
 
 echo "Install finished!"
-echo "Run monitor --help for usage"
+echo "Please source your script(.bashrc or .zshrc), then run monitor --help for usage"
