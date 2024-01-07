@@ -59,7 +59,7 @@ if __name__ == "__main__":
     ids = list_to_str(ids)
     logger.info(f"find suitable device [{ids}], start running...")
 
-    os.environ["CUDA_VISIBLE_DEVECES"] = ids
+    os.environ["CUDA_VISIBLE_DEVICES"] = ids
     if args.command:
         os.system(args.command)
     else:
