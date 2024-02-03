@@ -7,14 +7,20 @@ from utils import build_logger, list_to_str
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="auto-runner")
-    parser.add_argument("--ids", type=int, nargs="+", help="the gpus you want to use")
+    parser.add_argument(
+        "--ids", type=int, nargs="+", help="the id of gpus you want to use"
+    )
     parser.add_argument("--nums", type=int, help="the number of gpus you want to use")
     parser.add_argument("--mem", type=int, help="the memory you need")
     parser.add_argument(
-        "-c", "--command", type=str, default=None, help="command to run"
+        "-c", "--command", type=str, default=None, help="command you want to run"
     )
     parser.add_argument(
-        "-f", "--command_file", type=str, default=None, help="shell file path"
+        "-f",
+        "--command_file",
+        type=str,
+        default=None,
+        help="path of a shell file that contains the command you want to run",
     )
     parser.add_argument(
         "--thres",
@@ -51,16 +57,13 @@ if __name__ == "__main__":
 
         time.sleep(args.sleep)
 
-    ids = processer.query()
-    num = len(ids)
-    if len(ids) == 0:
-        exit()
+    free_ids = processer.free_gpus()
+    num_ids = len(free_ids)
+    free_ids_str = list_to_str(free_ids)
+    logger.info(f"find suitable device [{free_ids_str}], start running...")
 
-    ids = list_to_str(ids)
-    logger.info(f"find suitable device [{ids}], start running...")
-
-    os.environ["CUDA_VISIBLE_DEVICES"] = ids
+    os.environ["CUDA_VISIBLE_DEVICES"] = free_ids_str
     if args.command:
         os.system(args.command)
     else:
-        os.system(f"bash {args.command_file} {ids} {num}")
+        os.system(f"bash {args.command_file} {free_ids_str} {num_ids}")

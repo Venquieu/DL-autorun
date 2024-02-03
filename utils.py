@@ -2,7 +2,7 @@ import sys
 import logging
 
 
-def build_logger(name=None, console_output=True, **kargs):
+def build_logger(name: str, console_output=True, **kargs):
     if console_output and "filename" in kargs:
         handle = [
             logging.FileHandler(kargs["filename"]),
@@ -10,6 +10,7 @@ def build_logger(name=None, console_output=True, **kargs):
         ]
         kargs["handlers"] = handle
         del kargs["filename"]
+
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s %(name)s %(message)s",
