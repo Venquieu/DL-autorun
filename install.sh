@@ -40,4 +40,4 @@ if [ -f .zshrc ]; then
 fi
 
 echo "Install finished!"
-echo "Please source your script(.bashrc or .zshrc), then run monitor --help for usage"
+echo "Please close and restart your shell to make it work, then run monitor --help for usage"

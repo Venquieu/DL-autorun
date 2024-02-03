@@ -8,7 +8,7 @@ class GpuProcesser(object):
         self.update()
 
         self.num_gpus = len(self.gpu_map)
-        self.free_gpus = []
+        self.__free_gpus = []
 
     def parse(self, info=None):
         if info is None:
@@ -48,18 +48,18 @@ class GpuProcesser(object):
             if self.gpu_map[gpu_id]["util"] > self.UTIL_THRES:
                 return False
 
-        self.free_gpus = gpu_id
+        self.__free_gpus = gpu_id
         return True
 
     def n_gpus_available(self, num):
         # firstly clear it
-        self.free_gpus = []
+        self.__free_gpus = []
 
         for gpu_id in range(self.num_gpus):
             if self.gpu_map[gpu_id]["util"] < self.UTIL_THRES:
-                self.free_gpus.append(gpu_id)
+                self.__free_gpus.append(gpu_id)
 
-            if len(self.free_gpus) == num:
+            if len(self.__free_gpus) == num:
                 return True
 
         return False
@@ -79,13 +79,13 @@ class GpuProcesser(object):
                 max_left[1]["left"] = item["left"]
 
         if max_left[0]["left"] > memory:
-            self.free_gpus = [max_left[0]["id"]]
+            self.__free_gpus = [max_left[0]["id"]]
             return True
         if max_left[0]["left"] + max_left[1]["left"] > memory:
-            self.free_gpus = [max_left[0]["id"], max_left[1]["id"]]
+            self.__free_gpus = [max_left[0]["id"], max_left[1]["id"]]
             return True
 
-        self.free_gpus = []
+        self.__free_gpus = []
         return False
 
     def update(self):
@@ -98,5 +98,6 @@ class GpuProcesser(object):
             print("error occured when running `nvidia-smi`")
             return False
 
-    def query(self):
-        return self.free_gpus
+    @property
+    def free_gpus(self):
+        return self.__free_gpus
