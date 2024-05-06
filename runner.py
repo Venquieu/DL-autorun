@@ -57,7 +57,7 @@ if __name__ == "__main__":
 
         time.sleep(args.sleep)
 
-    free_ids = processer.free_gpus()
+    free_ids = processer.free_gpus
     num_ids = len(free_ids)
     free_ids_str = list_to_str(free_ids)
     logger.info(f"find suitable device [{free_ids_str}], start running...")
